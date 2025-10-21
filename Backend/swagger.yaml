@@ -54,7 +54,7 @@ paths:
         - Bearer: []
       tags:
         - User Module
-      summary: User Profile API
+      summary: Get user profile
       responses:
         "200":
           description: User profile retrieved successfully
@@ -65,7 +65,7 @@ paths:
         - Bearer: []
       tags:
         - User Module
-      summary: Update User Profile
+      summary: Update user profile
       parameters:
         - in: body
           name: body
@@ -84,17 +84,40 @@ paths:
         - Bearer: []
       tags:
         - Transactions Module
-      summary: Get all transactions
+      summary: Get all transactions for a specific account (with optional date filtering)
       parameters:
         - name: accountId
           in: path
           required: true
           type: string
+          description: The ID of the account whose transactions are requested
+        - name: startDate
+          in: query
+          required: false
+          type: string
+          format: date
+          x-example: "2025-10-01"
+          description: Filter transactions starting from this date (inclusive)
+        - name: endDate
+          in: query
+          required: false
+          type: string
+          format: date
+          x-example: "2025-10-31"
+          description: Filter transactions until this date (inclusive)
       responses:
         "200":
           description: List of transactions
           schema:
             $ref: "#/definitions/TransactionsResponse"
+        "401":
+          description: Unauthorized - missing or invalid Authorization token
+        "403":
+          description: Forbidden - trying to access another user's account
+        "404":
+          description: Account not found
+        "500":
+          description: Internal server error - unexpected problem (e.g. database issues)
 
   /transactions/{transactionId}:
     get:
@@ -108,32 +131,63 @@ paths:
           in: path
           required: true
           type: string
+          description: The unique ID of the transaction
       responses:
         "200":
-          description: Transaction details
+          description: Transaction details returned successfully
           schema:
             $ref: "#/definitions/TransactionResponse"
-    put:
+        "401":
+          description: Unauthorized - missing or invalid Authorization token
+        "403":
+          description: Forbidden - trying to access another user's transaction
+        "404":
+          description: Transaction not found
+        "500":
+          description: Internal server error - unexpected problem (e.g. database issues)
+
+    patch:
       security:
         - Bearer: []
       tags:
         - Transactions Module
-      summary: Update a transaction
+      summary: Partially update a transaction (category or note)
       parameters:
         - name: transactionId
           in: path
           required: true
           type: string
+          description: The unique ID of the transaction to update
         - in: body
           name: body
           required: true
           schema:
-            $ref: "#/definitions/UpdateTransaction"
+            type: object
+            properties:
+              category:
+                type: string
+                description: The category of the transaction (can be null to remove)
+              note:
+                type: string
+                description: The note for the transaction (can be null to remove)
+            example:
+              category: null
+              note: "Updated note"
       responses:
         "200":
           description: Transaction updated successfully
           schema:
             $ref: "#/definitions/TransactionResponse"
+        "400":
+          description: Bad Request - invalid or malformed input
+        "401":
+          description: Unauthorized - missing or invalid Authorization token
+        "403":
+          description: Forbidden - not allowed to modify this transaction
+        "404":
+          description: Transaction not found
+        "500":
+          description: Internal server error - unexpected problem (e.g. database failures)
 
 securityDefinitions:
   Bearer:

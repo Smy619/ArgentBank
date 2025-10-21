@@ -26,10 +26,6 @@ app.use(express.urlencoded({ extended: true }))
 // Handle custom routes
 app.use('/api/v1/user', require('./routes/userRoutes'))
 
-app.use('/api/v1/accounts', require('./routes/accountRoutes'))
-
-app.use('/api/v1/transactions', require('./routes/transactionRoutes'))
-
 // API Documentation
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
