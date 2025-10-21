@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
@@ -16,13 +16,12 @@ function Login() {
   const [password, setPassword] = useState(""); //state for password input
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const token = useSelector((state) => state.auth.token);
-  const user = useSelector((state) => state.auth.user);
+  const [loading, setLoading] = useState(false);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent from reload
-
+    setLoading(true);
     try {
       const loginData = await login(email, password);
       const token = loginData.body.token;
@@ -40,11 +39,13 @@ function Login() {
     } catch (error) {
       console.error("Error during login:", error);
       alert(error.message);
+    } finally {
+      setLoading(false);
     }
   };
   return (
     <>
-      <Navbar isLoggedIn={!!token} userName={user?.userName} />
+      <Navbar />
       <main>
         <section className="sign-in-content">
           <FaUserCircle className="sign-in-icon" />
@@ -81,7 +82,9 @@ function Login() {
             </div>
 
             {/*Should be the button below*/}
-            <button type ="submit" className="sign-in-button">Sign In</button>
+            <button type ="submit" className="sign-in-button" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
           </form>
         </section>
       </main>

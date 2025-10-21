@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setUserInfo } from "../feature/auth/authSlice";
+import { updateProfile } from "../../utils/api";
 import "./EditUserForm.css";
 
 function EditUserForm({ onCancel }) {
@@ -25,20 +26,7 @@ function EditUserForm({ onCancel }) {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      // Call API to update user info
-      const results = await fetch("http://localhost:3001/api/v1/user/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // You need to get the token from the store
-        },
-        body: JSON.stringify({ userName: newUserName }), // Only userName is editable
-      });
-
-      const data = await results.json();
-
-      if (!results.ok) throw new Error(`Server error: ${results.status}`);
-      if (data.status !== 200) throw new Error(data.message || "Update failed");
+      const data = await updateProfile(newUserName, token);
 
       // Update Redux store with new info
       dispatch(setUserInfo(data.body));

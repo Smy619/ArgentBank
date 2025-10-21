@@ -1,59 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, Navigate } from "react-router-dom";
+import { accounts } from "../../data/accounts";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import Account from "../../components/account/Account";
 import EditUserForm from "../../components/EditUserForm/EditUserForm";
-import { loginSuccess, setUserInfo } from "../../components/feature/auth/authSlice";
-import { getProfile } from "../../utils/api";
-import { fetchAccountsThunk } from "../../components/feature/accountSlice";
 import "./Profile.css";
 
 function Profile() {
-  const dispatch = useDispatch();
-  const token = useSelector((state) => state.auth.token);
-  const user = useSelector((state) => state.auth.user);
-  const accountsState = useSelector((state) => state.accounts);
+  const token = localStorage.getItem("token");
+  const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const restoreFromLocalStorage = () => {
-      const savedToken = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user");
-      if (savedToken && savedUser) {
-       dispatch(loginSuccess({
-        token:savedToken,
-        user:JSON.parse(savedUser)
-       }));
-      }
-    };
-
-    const fetchProfile = async () => {
-      try {
-        const data = await getProfile(token);
-        dispatch(setUserInfo(data.body));
-        localStorage.setItem("user", JSON.stringify(data.body));
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        restoreFromLocalStorage();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (token) {
-      fetchProfile();
-    } else {
-      restoreFromLocalStorage();
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
-  }, [token,dispatch]);
+  }, []);
 
-  useEffect(()=> {
-    dispatch(fetchAccountsThunk())
-}, [dispatch]);
-
-  if (loading) return <p>Loading profile ...</p>;
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <>
@@ -83,16 +52,18 @@ function Profile() {
 
           {/* Account Section */}
           <h2 className="sr-only">Accounts</h2>
-          {accountsState.loading &&<p>Loading accounts ...</p>}
-          {accountsState.error && <p>{accountsState.error}</p>}
-          {accountsState.items.map((account) => (
-            <Account
+          {accounts.map((account) => (
+            <div
               key={account.accountId}
-              title={account.title}
-              amount={account.amount}
-              description={account.description}
-              accountId={account.accountId}
-            />
+              onClick={() => navigate(`/transactions/${account.accountId}`)}
+              style={{ cursor: "pointer" }}
+            >
+              <Account
+                title={account.title}
+                amount={account.amount}
+                description={account.description}
+              />
+            </div>
           ))}
         </div>
       </main>

@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { useDispatch } from "react-redux";
 import { FaChevronDown, FaChevronUp, FaPen} from "react-icons/fa";
+import { updateTransactionLocally } from "../../feature/transactionSlice";
 import "./TransactionRow.css";
 
-function TransactionRow({ transaction, onUpdate }) {
+function TransactionRow({ transaction }) {
+  const dispatch = useDispatch();
+
   const {
     id,
     date,
@@ -22,22 +25,16 @@ function TransactionRow({ transaction, onUpdate }) {
   const [editNote, setEditNote] = useState(note);
 
   const handleSave = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `http://localhost:3001/api/v1/transactions/${id}`,
-        { category: editCategory, note: editNote },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      onUpdate(id, { category: editCategory, note: editNote });
-      setIsEditingCategory(false);
-      setIsEditingNote(false);
-    } catch (err) {
-      console.error("Error updating transaction :", err);
-      alert("Failed to update transaction");
-    }
+    dispatch(
+      updateTransactionLocally({
+        id,
+        updates: { category: editCategory, note: editNote },
+      })
+    );
+    setIsEditingCategory(false);
+    setIsEditingNote(false);
   };
+
   const handleCancel = () => {
     setIsEditingCategory(false);
     setIsEditingNote(false);
@@ -118,7 +115,7 @@ function TransactionRow({ transaction, onUpdate }) {
           {(isEditingCategory || isEditingNote) && (
             <div style={{ marginTop: "1rem" }}>
               <button onClick={handleSave}>💾 Save</button>
-              <button button onClick={handleCancel}>
+              <button onClick={handleCancel}>
                 ❌ Cancel
               </button>
             </div>

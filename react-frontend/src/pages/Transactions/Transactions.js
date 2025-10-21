@@ -1,78 +1,60 @@
-import React, { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React from "react";
+import { useParams, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Navbar from "../../components/navbar/Navbar";
 import TransactionTable from "../../components/Transaction/TransactionTable/TransactionTable";
 import Account from "../../components/account/Account";
 import Footer from "../../components/footer/Footer";
-import {
-  fetchTransactions,
-  updateTransaction,
-} from "../../components/feature/transactionSlice.js";
+import { accounts } from "../../data/accounts";
+import { transactions } from "../../data/transactions";
 import "./Transactions.css";
-import { useDispatch, useSelector } from "react-redux";
 
 function Transactions() {
   const { accountId } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  const {
-    items: transactions,
-    loading,
-    error,
-  } = useSelector((state) => state.transactions);
+  const token = localStorage.getItem("token");
+  const user = useSelector((state) => state.auth.user);
 
-  const {
-    items: accounts,
-    loading: accountsLoading,
-  } = useSelector((state) => state.accounts);
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
 
   const currentAccount = accounts.find(
     (acc) => acc.accountId === Number(accountId)
   );
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
+  const filteredTransactions = transactions.filter(
+    (t) => t.accountId === Number(accountId)
+  );
 
-    if (accountId) {
-      dispatch(fetchTransactions(accountId));
-    }
-  }, [accountId, dispatch, navigate, isAuthenticated]);
+  if (!currentAccount) {
+    return (
+      <>
+        <Navbar />
+        <main className="main">
+          <div className="main-content">
+            <p>Account not found.</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
-      <Navbar isLoggedIn={isAuthenticated} />
+      <Navbar isLoggedIn={!!token} userName={user?.userName} />
       <main className="main">
         <div className="main-content">
-          {(loading || accountsLoading) && <p>Loading ...</p>}
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          <Account
+            title={currentAccount.title}
+            amount={currentAccount.amount}
+            description={currentAccount.description}
+            showButton={false}
+            showCloseIcon={true}
+          />
 
-          {!loading && !accountsLoading && currentAccount && (
-            <>
-              <Account
-                title={currentAccount.title}
-                amount={currentAccount.amount}
-                description={currentAccount.description}
-                showButton={false}
-                showCloseIcon={true}
-              />
-
-              <TransactionTable
-                transactions={transactions}
-                onUpdate={(id, updates) => {
-                  dispatch(updateTransaction({ id, updates }));
-                }}
-              />
-            </>
-          )}
-
-          {!loading && !accountsLoading && !currentAccount && (
-            <p>Account not found.</p>
-          )}
+          <TransactionTable transactions={filteredTransactions} />
         </div>
       </main>
       <Footer />

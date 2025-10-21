@@ -4,10 +4,10 @@ import { faCircleUser, faPowerOff } from "@fortawesome/free-solid-svg-icons";
 import { FiSettings } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../feature/auth/authSlice";
-import logo from "../../assets/img/argentBankLogo.png";
+import logo from "../../assets/img/argentBankLogo.webp";
 import "./Navbar.css";
 
-function Navbar({ isLoggedIn, userName }) {
+function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -15,7 +15,9 @@ function Navbar({ isLoggedIn, userName }) {
 
   const handleLogout = (e) => {
     dispatch(logout());
-    navigate("/login");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
   };
   const displayName = user.userName || "";
 
@@ -42,7 +44,7 @@ function Navbar({ isLoggedIn, userName }) {
                 <button className="main-nav-item">
                   <FiSettings fontSize={40} fontWeight={400} />
                 </button>
-                <button className="main-nav-item" onClick={handleLogout}>
+                <button className="main-nav-item" onClick={handleLogout} aria-label="Log out">
                   <FontAwesomeIcon icon={faPowerOff} className="icon" />
                 </button>
               </div>
