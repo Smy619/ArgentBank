@@ -4,20 +4,17 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import { FaUserCircle } from "react-icons/fa";
-import {
-  loginSuccess,
-  setUserInfo,
-} from "../../components/feature/auth/authSlice";
-import { login , getProfile } from "../../utils/api";
+import { loginSuccess, setUserInfo } from "../../store/authSlice";
+import { login, getProfile } from "../../utils/api";
 import "./Login.css";
 
 function Login() {
   const [email, setEmail] = useState(""); //state for email input
   const [password, setPassword] = useState(""); //state for password input
+  const [rememberMe, setRememberMe] = useState(false);// Remember me state
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent from reload
@@ -25,15 +22,16 @@ function Login() {
     try {
       const loginData = await login(email, password);
       const token = loginData.body.token;
-
-      dispatch(loginSuccess({token}));
-      localStorage.setItem("token", token);
+      dispatch(loginSuccess({ token }));
       
       const profileData = await getProfile(token);
-
       dispatch(setUserInfo(profileData.body));
-      localStorage.setItem("user", JSON.stringify(profileData.body));
 
+      // Save only if “Remember me” is checked
+      if (rememberMe) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(profileData.body));
+      }
       // navigate to profile page
       navigate("/profile");
     } catch (error) {
@@ -77,12 +75,12 @@ function Login() {
 
             {/* Remember me checkbox */}
             <div className="input-remember">
-              <input type="checkbox" id="remember-me" />
+              <input type="checkbox" id="remember-me" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
               <label htmlFor="remember-me">Remember me</label>
             </div>
 
-            {/*Should be the button below*/}
-            <button type ="submit" className="sign-in-button" disabled={loading}>
+            {/* Should be the button below */}
+            <button type="submit" className="sign-in-button" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>

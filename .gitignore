@@ -31,5 +31,12 @@ Thumbs.db
 # Coverage / test output
 coverage/
 
+# Extra rules for OpenClassrooms evaluator
+# (do not include backend or design mockups)
+Backend/
+Maquette/
+swagger.yaml
+
+
 
 

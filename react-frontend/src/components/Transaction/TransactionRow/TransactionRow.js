@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { FaChevronDown, FaChevronUp, FaPen} from "react-icons/fa";
-import { updateTransactionLocally } from "../../feature/transactionSlice";
+import { updateTransactionLocally } from "../../../store/transactionSlice";
 import "./TransactionRow.css";
 
 function TransactionRow({ transaction }) {

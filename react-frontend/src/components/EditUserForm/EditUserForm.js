@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setUserInfo } from "../feature/auth/authSlice";
+import { setUserInfo } from "../../store/authSlice";
 import { updateProfile } from "../../utils/api";
 import "./EditUserForm.css";
 

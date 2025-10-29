@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUser, faPowerOff } from "@fortawesome/free-solid-svg-icons";
 import { FiSettings } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../feature/auth/authSlice";
+import { logout } from "../../store/authSlice";
 import logo from "../../assets/img/argentBankLogo.webp";
 import "./Navbar.css";
 
@@ -44,7 +44,11 @@ function Navbar() {
                 <button className="main-nav-item">
                   <FiSettings fontSize={40} fontWeight={400} />
                 </button>
-                <button className="main-nav-item" onClick={handleLogout} aria-label="Log out">
+                <button
+                  className="main-nav-item"
+                  onClick={handleLogout}
+                  aria-label="Log out"
+                >
                   <FontAwesomeIcon icon={faPowerOff} className="icon" />
                 </button>
               </div>
