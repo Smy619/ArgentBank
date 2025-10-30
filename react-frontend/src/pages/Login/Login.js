@@ -32,6 +32,10 @@ function Login() {
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(profileData.body));
       }
+      else {
+        sessionStorage.setItem("token",token);
+        sessionStorage.setItem("use", JSON.stringify(profileData.body));
+      }
       // navigate to profile page
       navigate("/profile");
     } catch (error) {

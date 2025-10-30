@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUser, faPowerOff } from "@fortawesome/free-solid-svg-icons";
@@ -10,15 +11,31 @@ import "./Navbar.css";
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  //Get authentication state and user data from Redux store
+  const { isAuthenticated, user, token } = useSelector((state) => state.auth);
 
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  // Get user info from Redux first, otherwise fallback to localstorage
+  const storedUser =
+    user && user.userName
+      ? user
+      : JSON.parse(localStorage.getItem("user")) || null;
+  // Only consider the user "logged in" if all three are present
+  const isLoggedIn = isAuthenticated && token && storedUser;
 
-  const handleLogout = (e) => {
+  //Whenever authentication becomes false, clear any remaining data
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+  }, [isAuthenticated]);
+
+  //Handle logout: reset Redux +redirect to home page
+  const handleLogout = () => {
     dispatch(logout());
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
     navigate("/");
   };
+  // Username displayed in the navbar
   const displayName = user.userName || "";
 
   return (
@@ -34,7 +51,7 @@ function Navbar() {
         </Link>
 
         <div>
-          {isAuthenticated ? (
+          {isLoggedIn ? (
             <>
               <div className="main-nav-right">
                 <Link className="main-nav-item" to="/profile">
