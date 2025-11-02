@@ -33,6 +33,12 @@ function Navbar() {
   //Handle logout: reset Redux +redirect to home page
   const handleLogout = () => {
     dispatch(logout());
+    
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+
     navigate("/");
   };
   // Username displayed in the navbar
